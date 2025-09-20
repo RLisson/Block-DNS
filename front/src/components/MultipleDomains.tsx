@@ -1,3 +1,5 @@
+import "./MultipleDomains.css"
+
 function MultipleDomains() {
     return (
         <div>

@@ -1,3 +1,5 @@
+import "./SingleDomain.css"
+
 function SingleDomain() {
     return (
         <div>
