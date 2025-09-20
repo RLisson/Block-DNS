@@ -1,4 +1,4 @@
-button {
+.custom-button {
     font-size: 1.2rem;
     cursor: pointer;
     margin-bottom: 20px;
@@ -8,6 +8,11 @@ button {
     color: #fff;
 }
 
-button:hover {
+.custom-button:hover {
     background-color: #0056b3;
+}
+
+.list-item-name input {
+    background: none;
+    text-align: center;
 }
