@@ -98,4 +98,39 @@ export class DomainService {
             throw error;
         }
     }
+
+    static async getPaginatedDomains(
+        page: number = 1,
+        limit: number = 10,
+        sortBy: string = 'id',
+        sortOrder: 'ASC' | 'DESC' = 'ASC'
+    ): Promise<{
+        data: any[];
+        pagination: {
+            page: number;
+            limit: number;
+            total: number;
+            totalPages: number;
+            hasNext: boolean;
+            hasPrev: boolean;
+        }
+    }> {
+        try {
+            // Validar parâmetros
+            const validatedPage = Math.max(1, Math.floor(page));
+            const validatedLimit = Math.min(Math.max(1, Math.floor(limit)), 100); // Máximo de 100 itens por página
+            const validSortOrders: ('ASC' | 'DESC')[] = ['ASC', 'DESC'];
+            const validatedSortOrder = validSortOrders.includes(sortOrder) ? sortOrder : 'ASC';
+
+            return await DomainModel.getAllPaginated(
+                validatedPage,
+                validatedLimit,
+                sortBy,
+                validatedSortOrder
+            );
+        } catch (error) {
+            console.error('Erro ao buscar domínios paginados:', error);
+            throw error;
+        }
+    }
 }

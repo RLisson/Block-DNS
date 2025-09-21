@@ -1,28 +1,169 @@
-import { useDomains } from "../hooks/useDomains";
+import { useState, useEffect } from "react";
+import { usePagination } from "../hooks/usePagination";
 import type { Domain } from "../types/domain";
 import Header from "../components/Header";
 import ListItem from "../components/ListItem";
+import PaginationControls from "../components/PaginationControls";
 import "./ViewDomains.css";
 
 function ViewDomains() {
-    const { domains, deleteDomain, updateDomain } = useDomains();
+    const {
+        data: domains,
+        loading,
+        error,
+        pagination,
+        goToPage,
+        nextPage,
+        prevPage,
+        changeLimit,
+        refresh
+    } = usePagination<Domain>('/domains', {
+        page: 1,
+        limit: 10,
+        sortBy: 'id',
+        sortOrder: 'ASC'
+    });
+
+    const [searchTerm, setSearchTerm] = useState<string>('');
+
+    useEffect(() => {
+        if (searchTerm.trim() === '') {
+            refresh();
+        } else {
+            const filtered = domains.filter(domain => 
+                domain.url.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+    }, [searchTerm]);
+
+
+    const handleDelete = async (id: number) => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api/v1'}/domains/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                refresh(); // Refresh the current page after deletion
+            } else {
+                console.error('Erro ao deletar domínio');
+            }
+        } catch (error) {
+            console.error('Erro ao deletar domínio:', error);
+        }
+    };
+
+    const handleUpdate = async (id: number, newUrl: string) => {
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api/v1'}/domains/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url: newUrl }),
+            });
+
+            if (response.ok) {
+                refresh(); // Refresh the current page after update
+            } else {
+                console.error('Erro ao atualizar domínio');
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar domínio:', error);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div>
+                <Header />
+                <main>
+                    <h2>View Domains</h2>
+                    <div className="loading">Carregando domínios...</div>
+                </main>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div>
+                <Header />
+                <main>
+                    <h2>View Domains</h2>
+                    <div className="error">
+                        Erro ao carregar domínios: {error}
+                        <button onClick={refresh} className="retry-btn">
+                            Tentar novamente
+                        </button>
+                    </div>
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div>
             <Header />
             <main>
-            <h2>View Domains</h2>
-            <ul>
-                {domains.map((domain: Domain) => (
-                    <ListItem 
-                        key={domain.id}
-                        id={domain.id}
-                        domain={domain.url} 
-                        deleteFunction={deleteDomain} 
-                        editFunction={updateDomain}
-                    />
-                ))}
-            </ul>
+                <h2>View Domains</h2>
+
+                <input type="text" placeholder="Buscar domínio..." className="search-input" onChange={(e) => setSearchTerm(e.target.value)}/>
+                
+                {domains.length === 0 ? (
+                    <div className="no-domains">
+                        <p>Nenhum domínio encontrado.</p>
+                    </div>
+                ) : (
+                    <>
+                        <ul className="domains-list">
+                            {searchTerm.trim() === '' ? (
+                                domains.map((domain: Domain, index: number) => (
+                                    <div 
+                                        key={domain.id}
+                                        style={{ animationDelay: `${index * 0.1}s` }}
+                                    >
+                                        <ListItem 
+                                            id={domain.id}
+                                            domain={domain.url} 
+                                            deleteFunction={handleDelete} 
+                                            editFunction={handleUpdate}
+                                        />
+                                    </div>
+                                ))
+                            ) : domains.filter(domain => 
+                                domain.url.toLowerCase().includes(searchTerm.toLowerCase())
+                            ).map((domain: Domain, index: number) => (
+                                <div 
+                                    key={domain.id}
+                                    style={{ animationDelay: `${index * 0.1}s` }}
+                                >
+                                    <ListItem 
+                                        id={domain.id}
+                                        domain={domain.url} 
+                                        deleteFunction={handleDelete} 
+                                        editFunction={handleUpdate}
+                                    />
+                                </div>
+                            ))}
+                        </ul>
+
+                        {pagination && (
+                            <PaginationControls
+                                currentPage={pagination.page}
+                                totalPages={pagination.totalPages}
+                                hasNext={pagination.hasNext}
+                                hasPrev={pagination.hasPrev}
+                                onPageChange={goToPage}
+                                onNext={nextPage}
+                                onPrev={prevPage}
+                                onLimitChange={changeLimit}
+                                currentLimit={pagination.limit}
+                                total={pagination.total}
+                            />
+                        )}
+                    </>
+                )}
             </main>
         </div>
     );

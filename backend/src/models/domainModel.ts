@@ -63,4 +63,56 @@ export class DomainModel {
         )
         return result.rows.length > 0;
     }
+
+    static async getAllPaginated(
+        page: number = 1, 
+        limit: number = 10, 
+        sortBy: string = 'id', 
+        sortOrder: 'ASC' | 'DESC' = 'ASC'
+    ): Promise<{
+        data: any[];
+        pagination: {
+            page: number;
+            limit: number;
+            total: number;
+            totalPages: number;
+            hasNext: boolean;
+            hasPrev: boolean;
+        }
+    }> {
+        // Validar e sanitizar parâmetros
+        const validSortColumns = ['id', 'url', 'created_at'];
+        const sortColumn = validSortColumns.includes(sortBy) ? sortBy : 'id';
+        const order = sortOrder === 'DESC' ? 'DESC' : 'ASC';
+        
+        // Calcular offset
+        const offset = (page - 1) * limit;
+        
+        // Buscar total de registros
+        const countResult = await query('SELECT COUNT(*) as total FROM domains');
+        const total = parseInt(countResult.rows[0].total);
+        
+        // Buscar dados paginados
+        const dataResult = await query(
+            `SELECT * FROM domains ORDER BY ${sortColumn} ${order} LIMIT $1 OFFSET $2`,
+            [limit, offset]
+        );
+        
+        // Calcular metadados de paginação
+        const totalPages = Math.ceil(total / limit);
+        const hasNext = page < totalPages;
+        const hasPrev = page > 1;
+        
+        return {
+            data: dataResult.rows,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages,
+                hasNext,
+                hasPrev
+            }
+        };
+    }
 }

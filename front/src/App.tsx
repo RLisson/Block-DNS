@@ -1,17 +1,43 @@
-import { BrowserRouter, Routes, Route } from "react-router"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router"
 import AddDomains from "./pages/AddDomains"
 import ViewDomains from "./pages/ViewDomains"
+import Login from "./pages/Login"
+import ProtectedRoute from "./components/ProtectedRoute"
+import { AuthProvider } from "./components/AuthProvider"
+
+const ProtectedRoutes = [
+  {
+    path: "/add-domains",
+    element: <AddDomains />
+  },
+  {
+    path: "/view-domains",
+    element: <ViewDomains />
+  }
+]
 
 function App() {
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<AddDomains />} />
-        <Route path="/add-domains" element={<AddDomains />} />
-        <Route path="/view-domains" element={<ViewDomains />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          {ProtectedRoutes.map(({ path, element }) => (
+            <Route
+              key={path}
+              path={path}
+              element={
+                <ProtectedRoute>
+                  {element}
+                </ProtectedRoute>
+              }
+            />
+          ))}
+          <Route path="/" element={<Navigate to="/view-domains" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 

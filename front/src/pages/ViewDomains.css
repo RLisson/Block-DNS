@@ -4,10 +4,69 @@ ul {
     margin: 0;
     text-align: left;
 }
-li:nth-child(odd) {
-    background-color: #f9f9f9;
+
+/* Removido os estilos de zebra para usar o novo design dos cards */
+
+.domains-list {
+    margin-bottom: 1rem;
 }
 
-li:nth-child(even) {
-    background-color: #fff;
+.domains-list > div {
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.1rem;
+    color: #666;
+}
+
+.error {
+    text-align: center;
+    padding: 2rem;
+    color: #dc3545;
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.retry-btn {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.retry-btn:hover {
+    background: #c82333;
+}
+
+.no-domains {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #666;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.no-domains p {
+    font-size: 1.1rem;
+    margin: 0;
 }
