@@ -34,8 +34,16 @@ export class DomainModel {
 
     static async update(id: number, url: string): Promise<string | null> {
         const result = await query(
-            'UPDATE domains SET url = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+            'UPDATE domains SET url = $1 WHERE id = $2 RETURNING *',
             [url, id]
+        )
+        return result.rows[0] || null;
+    }
+
+    static async updateByUrl(oldUrl: string, newUrl: string): Promise<string | null> {
+        const result = await query(
+            'UPDATE domains SET url = $1 WHERE url = $2 RETURNING *',
+            [newUrl, oldUrl]
         )
         return result.rows[0] || null;
     }

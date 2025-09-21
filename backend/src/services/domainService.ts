@@ -39,6 +39,7 @@ export class DomainService {
 
     static async create(url: string): Promise<string> {
         try {
+            console.log('Creating domain with URL:', url);
             const normalizedUrl = this.normalizeDomain(url);
             if (!this.validateDomain(normalizedUrl)) {
                 throw new Error('URL inválida');
@@ -65,6 +66,24 @@ export class DomainService {
                 throw new Error('Domínio já existe');
             }
             return await DomainModel.update(id, normalizedUrl);
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    }
+
+    static async updateByUrl(oldUrl: string, newUrl: string): Promise<string | null> {
+        try {
+            const normalizedOldUrl = this.normalizeDomain(oldUrl);
+            const normalizedNewUrl = this.normalizeDomain(newUrl);
+            if (!this.validateDomain(normalizedNewUrl)) {
+                throw new Error('URL inválida');
+            }
+            const exists = await DomainModel.exists(normalizedNewUrl);
+            if (exists) {
+                throw new Error('Domínio já existe');
+            }
+            return await DomainModel.updateByUrl(normalizedOldUrl, normalizedNewUrl);
         } catch (error) {
             console.error(error);
             throw error;
