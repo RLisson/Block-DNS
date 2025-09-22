@@ -8,7 +8,6 @@ $TTL 1H
                         )
                 NS      localhost.
                 
-terra.com     IN CNAME .
 awdaw.com     IN CNAME .
 nano.com     IN CNAME .
 youtube.cca     IN CNAME .
