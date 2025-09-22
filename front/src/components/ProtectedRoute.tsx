@@ -9,7 +9,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
         return <div>Carregando...</div>; // Ou algum componente de loading
     }
 
-    return authenticated ? <>{children}</> : <Navigate to="/login" replace />;
+    return authenticated ? <>{children}</> : <Navigate to="/login" replace/>;
 }
 
 export default ProtectedRoute

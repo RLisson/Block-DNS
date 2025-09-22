@@ -3,8 +3,12 @@ import { DomainModel } from "../models/domainModel";
 
 export class DomainService {
     static validateDomain(url: string): boolean {
-        const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
-        return domainRegex.test(url);
+        try {
+            return URL.canParse("https://" + url);
+        }
+        catch {
+            return false;
+        }
     }
 
     static normalizeDomain(url: string): string {
