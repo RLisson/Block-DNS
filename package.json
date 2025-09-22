@@ -1,0 +1,32 @@
+{
+  "name": "block-dns",
+  "version": "1.0.0",
+  "description": "Block DNS - Sistema de gerenciamento de domínios bloqueados",
+  "homepage": "https://github.com/RLisson/Block-DNS#readme",
+  "bugs": {
+    "url": "https://github.com/RLisson/Block-DNS/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RLisson/Block-DNS.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd front && npm run dev",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd front && npm run build && npm run preview",
+    "install:all": "npm install && cd backend && npm install && cd ../front && npm install",
+    "build": "cd front && npm run build",
+    "build:backend": "cd backend && npm run build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

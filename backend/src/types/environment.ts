@@ -10,6 +10,8 @@ export interface EnvironmentConfig {
   CORS_ORIGIN: string;
   JWT_SECRET: string;
   JWT_EXPIRES_IN: string;
+  DNS_RPZ_PATH: string;
+  REDIRECT: string;
 }
 
 export type NodeEnv = 'development' | 'production' | 'test';

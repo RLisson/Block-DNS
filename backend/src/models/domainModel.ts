@@ -1,7 +1,8 @@
 import { query } from "../config/database"
+import type { Domain } from "../types/domain.js"
 
 export class DomainModel {
-    static async getAll(): Promise<string[]> {
+    static async getAll(): Promise<Domain[]> {
         const result = await query(
             'SELECT * FROM domains ORDER BY id ASC'
         )

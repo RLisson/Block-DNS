@@ -5,6 +5,8 @@ const router = Router();
 
 router.get("/", DomainController.getAllDomains);
 
+router.get("/rpz", DomainController.generateRpz);
+
 router.get("/:id", DomainController.getDomainById);
 
 router.get("/url/:url", DomainController.getDomainByUrl);
@@ -16,5 +18,6 @@ router.put("/:id", DomainController.updateDomain);
 router.put("/", DomainController.updateByUrl);
 
 router.delete("/:id", DomainController.deleteDomain);
+
 
 export default router;

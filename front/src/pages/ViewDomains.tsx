@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { usePagination } from "../hooks/usePagination";
 import type { Domain } from "../types/domain";
 import Header from "../components/Header";
 import ListItem from "../components/ListItem";
 import PaginationControls from "../components/PaginationControls";
+import domainService from "../services/domainService";
 import "./ViewDomains.css";
 
 function ViewDomains() {
@@ -26,50 +27,30 @@ function ViewDomains() {
 
     const [searchTerm, setSearchTerm] = useState<string>('');
 
-    useEffect(() => {
-        if (searchTerm.trim() === '') {
-            refresh();
-        } else {
-            const filtered = domains.filter(domain => 
-                domain.url.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
-    }, [searchTerm]);
-
-
     const handleDelete = async (id: number) => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api/v1'}/domains/${id}`, {
-                method: 'DELETE',
-            });
-
-            if (response.ok) {
+            const response = await domainService.deleteDomain(id);
+            if (response) {
                 refresh(); // Refresh the current page after deletion
             } else {
-                console.error('Erro ao deletar domínio');
+                alert('Erro ao deletar domínio');
             }
         } catch (error) {
-            console.error('Erro ao deletar domínio:', error);
+            alert(`Erro ao deletar domínio: ${error}`);
         }
     };
 
     const handleUpdate = async (id: number, newUrl: string) => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api/v1'}/domains/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ url: newUrl }),
-            });
-
-            if (response.ok) {
+            const response = await domainService.updateDomain(id, newUrl);
+            if (response) {
+                await domainService.saveRpz(); // Save RPZ after updating a domain
                 refresh(); // Refresh the current page after update
             } else {
-                console.error('Erro ao atualizar domínio');
+                alert('Erro ao atualizar domínio');
             }
-        } catch (error) {
-            console.error('Erro ao atualizar domínio:', error);
+        } catch {
+            alert(`Erro ao atualizar domínio`);
         }
     };
 
@@ -117,21 +98,7 @@ function ViewDomains() {
                 ) : (
                     <>
                         <ul className="domains-list">
-                            {searchTerm.trim() === '' ? (
-                                domains.map((domain: Domain, index: number) => (
-                                    <div 
-                                        key={domain.id}
-                                        style={{ animationDelay: `${index * 0.1}s` }}
-                                    >
-                                        <ListItem 
-                                            id={domain.id}
-                                            domain={domain.url} 
-                                            deleteFunction={handleDelete} 
-                                            editFunction={handleUpdate}
-                                        />
-                                    </div>
-                                ))
-                            ) : domains.filter(domain => 
+                            {domains.filter(domain => 
                                 domain.url.toLowerCase().includes(searchTerm.toLowerCase())
                             ).map((domain: Domain, index: number) => (
                                 <div 

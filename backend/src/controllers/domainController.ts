@@ -1,5 +1,5 @@
 import { DomainService } from '../services/domainService';
-
+import { RpzZone } from '../config/rpz-zone';
 export default class DomainController {
     static async getAllDomains(req: any, res: any) {
         try {
@@ -33,6 +33,21 @@ export default class DomainController {
                     data: domains
                 });
             }
+        } catch (error: any) {
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
+    }
+
+    static async simpleGetAll(req: any, res: any) {
+        try {
+            const domains = await DomainService.getAll();
+            res.json({
+                success: true,
+                data: domains
+            });
         } catch (error: any) {
             res.status(500).json({
                 success: false,
@@ -177,6 +192,22 @@ export default class DomainController {
             res.json({
                 success: true,
                 message: 'Domínio deletado com sucesso'
+            });
+        } catch (error: any) {
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
+    };
+
+    static async generateRpz(req: any, res: any) {
+        try {
+            const domains = await DomainService.getAll();
+            await RpzZone.writeZoneFile(domains);
+            res.json({
+                success: true,
+                message: 'Arquivo RPZ gerado com sucesso'
             });
         } catch (error: any) {
             res.status(500).json({

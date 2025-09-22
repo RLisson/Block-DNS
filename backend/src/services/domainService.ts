@@ -1,3 +1,4 @@
+import type { Domain } from "../types/domain";
 import { DomainModel } from "../models/domainModel";
 
 export class DomainService {
@@ -10,7 +11,7 @@ export class DomainService {
         return url.toLowerCase().trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
     }
 
-    static async getAll(): Promise<string[]> {
+    static async getAll(): Promise<Domain[]> {
         try {
             return await DomainModel.getAll();
         } catch (error) {

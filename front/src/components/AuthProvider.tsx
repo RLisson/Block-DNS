@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import type { AuthContextType } from '../contexts/AuthContext';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api/v1';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<{ id: number; username: string; email: string } | null>(null);
@@ -10,11 +10,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [authenticated, setAuthenticated] = useState<boolean>(false);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            // Configurar headers para futuras requisições
-            console.log('Token encontrado:', token);
-        }
         checkAuthStatus();
     }, []);
 
