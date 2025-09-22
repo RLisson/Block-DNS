@@ -31,6 +31,7 @@ function ViewDomains() {
         try {
             const response = await domainService.deleteDomain(id);
             if (response) {
+                await domainService.saveRpz(); // Save RPZ after deleting a domain
                 refresh(); // Refresh the current page after deletion
             } else {
                 alert('Erro ao deletar domínio');
