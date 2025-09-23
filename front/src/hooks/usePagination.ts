@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { api } from '../services/domainService';
 
 interface PaginationOptions {
   page?: number;
@@ -69,17 +70,11 @@ export const usePagination = <T>(
       const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api/v1';
       const url = `${baseUrl}${endpoint}?${queryParams.toString()}`;
 
-      const response = await fetch(url);
+      const response = await api.get(url);
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result: PaginatedResponse<T> = await response.json();
-
-      if (result.success) {
-        setData(result.data);
-        setPagination(result.pagination);
+      if (response.data.success) {
+        setData(response.data.data);
+        setPagination(response.data.pagination);
       } else {
         throw new Error('Erro na resposta da API');
       }

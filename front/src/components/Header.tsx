@@ -19,7 +19,8 @@ function Header() {
                 <a href="/">Home</a>
                 <a href="/add-domains">Add Domains</a>
                 <a href="/view-domains">View Domains</a>
-                <a onClick={handleLogout}>Logout</a>
+                <a href="/config"><img className="header-icon" src="../src/assets/config.svg" alt="Config" /></a>
+                <a onClick={handleLogout}><img className="header-icon" src="../src/assets/logout.svg" alt="Logout" /></a>
             </nav>
         </header>
     );

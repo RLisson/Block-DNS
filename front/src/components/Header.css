@@ -25,3 +25,15 @@ nav a:hover {
     text-decoration: underline;
     cursor: pointer;
 }
+
+.header-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.header-icon:hover {
+    filter: invert(30%);
+    transform: scale(1.05);
+}

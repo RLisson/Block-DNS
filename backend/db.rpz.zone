@@ -1,6 +1,6 @@
 $TTL 1H
 @       IN      SOA     LOCALHOST. localhost.localhost. (
-                        2025092201 ; serial
+                        2025092301 ; serial
                         1h         ; refresh (1 hour)
                         15m        ; retry (15 minutes)
                         30d        ; expire (30 days)
@@ -11,7 +11,7 @@ $TTL 1H
 awdaw.com     IN CNAME .
 nano.com     IN CNAME .
 youtubeeeee.cca     IN CNAME .
-aaa.cbv     IN CNAME .
+aaa.com.br     IN CNAME .
 naano.com     IN CNAME .
 youtube.com     IN CNAME .
 tototo.com     IN CNAME .
@@ -21,3 +21,7 @@ terra.com     IN CNAME .
 llllll.com     IN CNAME .
 google.com.br     IN CNAME .
 yahoo.com.br     IN CNAME .
+google.com     IN CNAME .
+goobl.com.br     IN CNAME .
+aa.com.br     IN CNAME .
+yyy.com     IN CNAME .

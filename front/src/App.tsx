@@ -4,6 +4,8 @@ import ViewDomains from "./pages/ViewDomains"
 import Login from "./pages/Login"
 import ProtectedRoute from "./components/ProtectedRoute"
 import { AuthProvider } from "./components/AuthProvider"
+import Config from "./pages/Config"
+import CreateUser from "./pages/CreateUser"
 
 const ProtectedRoutes = [
   {
@@ -13,6 +15,14 @@ const ProtectedRoutes = [
   {
     path: "/view-domains",
     element: <ViewDomains />
+  },
+  {
+    path: "/config",
+    element: <Config />
+  },
+  {
+    path: "/create-user",
+    element: <CreateUser />
   }
 ]
 

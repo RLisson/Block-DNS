@@ -1,5 +1,7 @@
 import { DomainService } from '../services/domainService';
 import { RpzZone } from '../config/rpz-zone';
+import { requireAuth } from '../middlewares/auth';
+
 export default class DomainController {
     static async getAllDomains(req: any, res: any) {
         try {
@@ -17,7 +19,7 @@ export default class DomainController {
                     pageNum,
                     limitNum,
                     sortColumn,
-                    order as 'ASC' | 'DESC'
+                    order as 'ASC' | 'DESC',
                 );
                 
                 res.json({
@@ -44,6 +46,23 @@ export default class DomainController {
     static async simpleGetAll(req: any, res: any) {
         try {
             const domains = await DomainService.getAll();
+            res.json({
+                success: true,
+                data: domains
+            });
+        } catch (error: any) {
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
+    }
+
+    static async searchDomains(req: any, res: any) {
+        const { term } = req.query;
+        console.log("Searching for term:", term);
+        try {
+            const domains = await DomainService.search(term);
             res.json({
                 success: true,
                 data: domains

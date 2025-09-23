@@ -27,6 +27,7 @@ function ViewDomains() {
 
     const [searchTerm, setSearchTerm] = useState<string>('');
 
+
     const handleDelete = async (id: number) => {
         try {
             const response = await domainService.deleteDomain(id);
@@ -99,9 +100,7 @@ function ViewDomains() {
                 ) : (
                     <>
                         <ul className="domains-list">
-                            {domains.filter(domain => 
-                                domain.url.toLowerCase().includes(searchTerm.toLowerCase())
-                            ).map((domain: Domain, index: number) => (
+                            {!searchTerm ? (domains.map((domain: Domain, index: number) => (
                                 <div 
                                     key={domain.id}
                                     style={{ animationDelay: `${index * 0.1}s` }}
@@ -113,7 +112,21 @@ function ViewDomains() {
                                         editFunction={handleUpdate}
                                     />
                                 </div>
-                            ))}
+                            ))) : (
+                                domains.filter((domain: Domain) => domain.url.includes(searchTerm)).map((domain: Domain, index: number) => (
+                                    <div
+                                        key={domain.id}
+                                        style={{ animationDelay: `${index * 0.1}s` }}
+                                    >
+                                        <ListItem
+                                            id={domain.id}
+                                            domain={domain.url}
+                                            deleteFunction={handleDelete}
+                                            editFunction={handleUpdate}
+                                        />
+                                    </div>
+                                ))
+                            )}
                         </ul>
 
                         {pagination && (

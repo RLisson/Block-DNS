@@ -9,6 +9,16 @@ export class DomainModel {
         return result.rows;
     }
 
+    static async Search(searchTerm: string): Promise<Domain[]> {
+        const result = await query(
+            'SELECT * FROM domains WHERE url ILIKE $1 ORDER BY id ASC',
+            [`%${searchTerm}%`]
+        )
+        console.log(result.rows);
+        console.log(searchTerm)
+        return result.rows;
+    }
+
     static async getById(id: number): Promise<string | null> {
         const result = await query(
             'SELECT * FROM domains WHERE id = $1',

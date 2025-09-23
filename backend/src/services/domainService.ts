@@ -15,6 +15,16 @@ export class DomainService {
         return url.toLowerCase().trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
     }
 
+    static async search(term: string): Promise<Domain[]> {
+        try {
+            console.log('Searching for term:', term);
+            return await DomainModel.Search(term);
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    };
+
     static async getAll(): Promise<Domain[]> {
         try {
             return await DomainModel.getAll();

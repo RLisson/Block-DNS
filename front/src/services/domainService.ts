@@ -1,18 +1,52 @@
 import type { Domain } from "../types/domain";
-import axios from "axios";
+import axios, { AxiosHeaders, type InternalAxiosRequestConfig } from "axios";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
+const api = axios.create({
+  baseURL: BACKEND_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    if (!config.headers) {
+      config.headers = new AxiosHeaders();
+    }
+    config.headers.set('Authorization', `Bearer ${token}`);
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      // Redirecionar para login ou disparar evento
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export { api };
 
 export default class domainService {
   static async deleteDomain(id: number): Promise<boolean> 
   {
-    const response = await axios.delete(`${BACKEND_URL}/domains/${id}`);
+    const response = await api.delete(`/domains/${id}`);
     return response.data.success;
   }
 
   static async updateDomain(id: number, url: string): Promise<Domain> 
   {
-    const response = await axios.put(`${BACKEND_URL}/domains/${id}`, { url });
+    const response = await api.put(`/domains/${id}`, { url });
     return response.data.success;
   }
   
@@ -25,7 +59,7 @@ export default class domainService {
         if (!url.trim()) {
           continue; // Pular URLs vazias
         }
-        const response = await axios.post(`${BACKEND_URL}/domains`, { url });
+        const response = await api.post(`/domains`, { url });
 
         // Verificar se a resposta foi bem-sucedida
         if (response.status === 201) {
@@ -59,9 +93,16 @@ export default class domainService {
     return { added, failed };
   }
 
+  static async search(term: string): Promise<Domain[]> {
+    const response = await api.get(`/domains/search`, {
+      params: { q: term }
+    });
+    return response.data.data;
+  }
+
   static async saveRpz(): Promise<boolean> {
     try {
-      const response = await axios.get(`${BACKEND_URL}/domains/rpz`);
+      const response = await api.get(`/domains/rpz`);
       return response.data.success;
     } catch (error) {
       console.error('Erro ao gerar arquivo RPZ:', error);
