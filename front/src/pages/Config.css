@@ -1,5 +1,5 @@
-.create-user-container {
-    max-width: 400px;
+.config-container {
+    max-width: 600px;
     margin: 50px auto;
     padding: 20px;
     border: 1px solid #ccc;
@@ -7,18 +7,15 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     background-color: #f9f9f9;
     text-align: center;
+    height: 100vh;
 }
 
-.input-error {
-    border-color: red;
-}
-
-.input-error:focus {
-    box-shadow: 0 0 5px red;
-    border-color: red;
-}
-
-.create-user-container h2 {
+.config-container h2 {
     margin-bottom: 20px;
     text-align: center;
+}
+
+.config-container li a {
+    text-decoration: none;
+    color: black;
 }

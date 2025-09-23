@@ -54,7 +54,7 @@ export default function CreateUser() {
                 <form onSubmit={handleSubmit}>
                     <input
                         type="text"
-                        placeholder="Username"
+                        placeholder="Usuario"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                     />
@@ -66,13 +66,13 @@ export default function CreateUser() {
                     />
                     <input
                         type="password"
-                        placeholder="Password"
+                        placeholder="Senha"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
                     <input
                         type="password"
-                        placeholder="Confirm Password"
+                        placeholder="Confirmar Senha"
                         value={confirmPassword}
                         className={passWordMatch ? "" : "input-error"}
                         onChange={handleConfirmPasswordChange}
