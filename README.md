@@ -1,23 +1,29 @@
 # Block DNS 🛡️
 
-Sistema de gerenciamento de domínios bloqueados para servidor DNS com interface web intuitiva.
+Sistema avançado de gerenciamento de domínios bloqueados para servidor DNS com interface web moderna e funcionalidades administrativas completas.
 
 ![License](https://img.shields.io/badge/license-ISC-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
 ![PostgreSQL](https://img.shields.io/badge/postgresql-%3E%3D12.0-blue.svg)
+![React](https://img.shields.io/badge/react-19-blue.svg)
+![TypeScript](https://img.shields.io/badge/typescript-5.0-blue.svg)
 
 ## 📋 Sobre o Projeto
 
-O Block DNS é uma solução completa para gerenciamento de domínios bloqueados em servidores DNS. O sistema permite adicionar, editar, remover e visualizar domínios bloqueados através de uma interface web moderna, com geração automática de arquivos de zona RPZ (Response Policy Zone) para integração com servidores DNS como BIND.
+O Block DNS é uma solução completa e moderna para gerenciamento de domínios bloqueados em servidores DNS. O sistema oferece uma interface web intuitiva com funcionalidades avançadas de administração, geração automática de arquivos de zona RPZ (Response Policy Zone) e sistema robusto de gerenciamento de usuários.
 
 ### ✨ Principais Funcionalidades
 
-- 🔐 **Autenticação e Autorização**: Sistema completo de login com JWT
-- 📝 **Gerenciamento de Domínios**: CRUD completo para domínios bloqueados
-- 📄 **Paginação Inteligente**: Navegação eficiente em grandes listas
-- 🗃️ **Geração de Zona RPZ**: Criação automática de arquivos de zona DNS
-- 📱 **Interface Responsiva**: Design moderno com Material-UI
-- 🔄 **Atualizações em Tempo Real**: Interface dinâmica e reativa
+- 🔐 **Sistema de Autenticação Completo**: Login seguro com JWT e gerenciamento de sessões
+- � **Gerenciamento Multi-usuário**: Criação, edição e administração de usuários
+- 📝 **CRUD Avançado de Domínios**: Gerenciamento completo com busca e filtros
+- 📄 **Paginação Inteligente**: Navegação eficiente em grandes conjuntos de dados
+- 🗃️ **Geração Automática RPZ**: Criação de arquivos de zona DNS otimizados
+- 🎨 **Interface Moderna**: Design responsivo com componentes customizados
+- 🔄 **Atualizações em Tempo Real**: Interface reativa com feedback instantâneo
+- 🛠️ **Painel de Configurações**: Gerenciamento centralizado de configurações do sistema
+- 📊 **Dashboard Administrativo**: Visão geral e métricas do sistema
+- 🔍 **Sistema de Busca**: Pesquisa rápida e eficiente de domínios
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -33,9 +39,10 @@ O Block DNS é uma solução completa para gerenciamento de domínios bloqueados
 ### Frontend
 - **React 19** + **TypeScript** - Biblioteca UI e tipagem
 - **Vite** - Build tool moderna e rápida
-- **Material-UI (MUI)** - Componentes e design system
-- **Axios** - Cliente HTTP
-- **React Router** - Roteamento SPA
+- **React Router v7** - Roteamento SPA avançado
+- **Axios** - Cliente HTTP para comunicação com API
+- **Context API** - Gerenciamento de estado global
+- **Custom Hooks** - Lógica reutilizável e modular
 
 ### DevOps & Ferramentas
 - **Concurrently** - Execução paralela de scripts
@@ -117,7 +124,7 @@ REDIRECT=localhost
 ### 4. Configure o frontend
 ```bash
 # front/.env
-VITE_API_URL=http://localhost:3001
+VITE_BACKEND_URL=http://localhost:3001/api/v1
 ```
 
 ### 5. Inicie o projeto
@@ -179,17 +186,23 @@ npm run install:all        # Instala todas as dependências
 ## 🌐 Endpoints da API
 
 ### Autenticação
-- `POST /api/auth/login` - Login do usuário
-- `POST /api/auth/register` - Registro de usuário
+- `POST /api/v1/auth/login` - Login do usuário
+- `POST /api/v1/auth/register` - Registro de usuário
+- `GET /api/v1/auth/me` - Informações do usuário autenticado
+- `GET /api/v1/auth/getAll` - Lista todos os usuários
+- `PATCH /api/v1/auth/update/:id` - Atualiza usuário
+- `DELETE /api/v1/auth/delete/:id` - Remove usuário
 
 ### Domínios
-- `GET /api/domains` - Lista domínios (com paginação)
-- `POST /api/domains` - Adiciona novo domínio
-- `PUT /api/domains/:id` - Atualiza domínio
-- `DELETE /api/domains/:id` - Remove domínio
+- `GET /api/v1/domains` - Lista domínios (com paginação)
+- `GET /api/v1/domains/search?q=termo` - Busca domínios
+- `GET /api/v1/domains/:id` - Busca domínio por ID
+- `POST /api/v1/domains` - Adiciona novo domínio
+- `PUT /api/v1/domains/:id` - Atualiza domínio
+- `DELETE /api/v1/domains/:id` - Remove domínio
 
 ### RPZ Zone
-- `GET /api/domains/rpz` - Gera arquivo de zona RPZ
+- `GET /api/v1/domains/rpz` - Gera arquivo de zona RPZ
 
 ## 🔐 Autenticação
 
