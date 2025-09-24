@@ -7,3 +7,53 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
+
+.manage-users-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0 5px;
+    transition: background-color 0.3s;
+}
+
+.manage-users-button:hover {
+    background-color: #0069d9;
+}
+
+.manage-users-form {
+    margin: auto;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.manage-users-form input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.manage-users-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.manage-users-form button {
+    align-self: center;
+}
+
+.manage-users-form input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.manage-users-edit-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}

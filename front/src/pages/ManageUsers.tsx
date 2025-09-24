@@ -75,11 +75,14 @@ export default function ManageUsers() {
                         <li key={user.id}>
                             <span>
                                 {isEditing && editUserId === user.id ? (
-                                    <form onSubmit={(e) => handleEditSubmit(e, user.id)}>
+                                    <form className="manage-users-form" onSubmit={(e) => handleEditSubmit(e, user.id)}>
                                         <input type="text" name="username" onChange={(e) => setEditedUsername(e.target.value)} value={editedUsername} />
                                         <input type="email" name="email" onChange={(e) => setEditedEmail(e.target.value)} value={editedEmail} />
                                         <input type="password" name="password" onChange={(e) => setEditedPassword(e.target.value)} value={editedPassword} placeholder="Nova Senha" />
-                                        <button type="submit">Salvar</button>
+                                        <span className="manage-users-edit-buttons">
+                                            <button className="manage-users-button" type="submit">Salvar</button>
+                                            <button className="manage-users-button" type="button" onClick={() => { setIsEditing(false); setEditUserId(null); }}>Cancelar</button>
+                                        </span>
                                     </form>
                                 ) : (
                                     <>
@@ -87,9 +90,9 @@ export default function ManageUsers() {
                                     </>
                                 )}
                             </span>
-                            <span>
-                                <button className="edit-button" onClick={() => { handleEdit(user.id, user.username, user.email ) }} >Editar</button>
-                                <button className="delete-button" onClick={() => handleDelete(user.id)}>Excluir</button>
+                            <span {...(isEditing && editUserId === user.id ? { style: { display: 'none' } } : {})} className="manage-users-actions">
+                                <button className="manage-users-button" onClick={() => { handleEdit(user.id, user.username, user.email ) }} >Editar</button>
+                                <button className="manage-users-button" onClick={() => handleDelete(user.id)}>Excluir</button>
                             </span>
                         </li>
                     ))}
