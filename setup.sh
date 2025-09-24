@@ -205,6 +205,78 @@ case ${cors_choice:-3} in
         ;;
 esac
 
+# Configuração SCP
+echo ""
+echo -e "${BLUE}📡 Configuração SCP (Envio Automático de Arquivo RPZ):${NC}"
+echo "O sistema pode enviar automaticamente o arquivo RPZ para outra VM Linux."
+echo ""
+read -p "Habilitar envio automático via SCP? [y/N]: " enable_scp
+
+if [[ "$enable_scp" =~ ^[Yy]$ ]]; then
+    SCP_ENABLED="true"
+    
+    echo ""
+    echo "Configure os dados da VM de destino:"
+    
+    while true; do
+        read -p "IP/hostname da VM de destino: " scp_host
+        if [[ -n "$scp_host" ]]; then
+            SCP_HOST="$scp_host"
+            break
+        else
+            error "IP/hostname é obrigatório!"
+        fi
+    done
+    
+    while true; do
+        read -p "Usuário SSH na VM de destino: " scp_user
+        if [[ -n "$scp_user" ]]; then
+            SCP_USER="$scp_user"
+            break
+        else
+            error "Usuário SSH é obrigatório!"
+        fi
+    done
+    
+    read -p "Caminho de destino do arquivo RPZ [/etc/bind/rpz.db]: " scp_path
+    SCP_PATH=${scp_path:-/etc/bind/rpz.db}
+    
+    read -p "Caminho da chave SSH [~/.ssh/id_rsa]: " scp_key
+    SCP_KEY=${scp_key:-~/.ssh/id_rsa}
+    
+    read -p "Reiniciar serviço BIND automaticamente? [Y/n]: " restart_bind
+    if [[ "$restart_bind" =~ ^[Nn]$ ]]; then
+        SCP_RESTART_BIND="false"
+    else
+        SCP_RESTART_BIND="true"
+    fi
+    
+    # Teste de conectividade (opcional)
+    echo ""
+    read -p "Testar conectividade SSH agora? [y/N]: " test_ssh
+    if [[ "$test_ssh" =~ ^[Yy]$ ]]; then
+        log "Testando conectividade SSH..."
+        if ssh -i "$SCP_KEY" -o ConnectTimeout=10 -o StrictHostKeyChecking=no "$SCP_USER@$SCP_HOST" "echo 'Conexão SSH OK'" 2>/dev/null; then
+            log "✅ Conectividade SSH verificada com sucesso!"
+        else
+            warn "⚠️  Não foi possível conectar via SSH. Verifique:"
+            warn "   - Se a chave SSH está correta: $SCP_KEY"
+            warn "   - Se o usuário tem acesso: $SCP_USER@$SCP_HOST"
+            warn "   - Se a VM de destino está acessível"
+            warn "   Você pode continuar e configurar depois."
+        fi
+    fi
+    
+else
+    SCP_ENABLED="false"
+    SCP_HOST=""
+    SCP_USER=""
+    SCP_PATH="/etc/bind/rpz.db"
+    SCP_KEY="~/.ssh/id_rsa"
+    SCP_RESTART_BIND="false"
+    log "SCP desabilitado - arquivo RPZ não será enviado automaticamente"
+fi
+
 # Mostrar resumo das configurações
 echo ""
 header "Resumo das Configurações"
@@ -216,6 +288,11 @@ echo "  🔐 JWT expira em: $JWT_EXPIRES_IN"
 echo "  🌐 CORS: $CORS_ORIGIN"
 echo "  🚀 Porta frontend: $FRONTEND_PORT"
 echo "  ⚙️  Projeto: $COMPOSE_PROJECT_NAME"
+if [[ "$SCP_ENABLED" == "true" ]]; then
+    echo "  📡 SCP habilitado: $SCP_USER@$SCP_HOST:$SCP_PATH"
+else
+    echo "  📡 SCP: Desabilitado"
+fi
 echo ""
 read -p "Continuar com essas configurações? [Y/n]: " confirm
 if [[ "$confirm" =~ ^[Nn]$ ]]; then
@@ -244,6 +321,14 @@ FRONTEND_PORT=${FRONTEND_PORT:-80}
 
 # Portas internas
 BACKEND_PORT=${BACKEND_PORT:-3001}
+
+# SCP Configuration
+SCP_ENABLED=${SCP_ENABLED:-false}
+SCP_HOST=${SCP_HOST:-}
+SCP_USER=${SCP_USER:-}
+SCP_PATH=${SCP_PATH:-/etc/bind/rpz.db}
+SCP_KEY=${SCP_KEY:-~/.ssh/id_rsa}
+SCP_RESTART_BIND=${SCP_RESTART_BIND:-false}
 EOF
 
 log "✅ Arquivo .env configurado"
@@ -395,7 +480,6 @@ echo " 📋 Comandos Úteis:"
 echo "   Ver logs: docker-compose logs -f"
 echo "   Parar: docker-compose down"
 echo "   Reiniciar: docker-compose restart"
-echo "   Reconfigurar: ./setup-access.sh"
 echo ""
 echo " 🛠️ Funcionalidades:"
 echo "   ✓ Gerenciamento de domínios bloqueados"
@@ -403,6 +487,11 @@ echo "   ✓ Geração automática de arquivos RPZ"
 echo "   ✓ Interface web responsiva"
 echo "   ✓ API REST completa"
 echo "   ✓ Autenticação JWT"
+if [[ "$SCP_ENABLED" == "true" ]]; then
+    echo "   ✓ Envio automático via SCP para $SCP_HOST"
+else
+    echo "   • Envio SCP desabilitado"
+fi
 echo ""
 
 # Salvar informações da instalação
@@ -424,11 +513,41 @@ Credenciais:
 - Usuário: admin
 - Senha: admin123
 
+SCP Configuration:
+- Enabled: $SCP_ENABLED
+- Host: $SCP_HOST
+- User: $SCP_USER
+- Path: $SCP_PATH
+- Restart BIND: $SCP_RESTART_BIND
+
 Containers:
 $(docker-compose ps)
 EOF
 
 log "📄 Informações salvas em install-info.txt"
+
+# Informações adicionais sobre SCP
+if [[ "$SCP_ENABLED" == "true" ]]; then
+    echo ""
+    echo -e "${BLUE}📡 Configuração SCP:${NC}"
+    echo "   Status: Habilitado"
+    echo "   Destino: $SCP_USER@$SCP_HOST:$SCP_PATH"
+    echo "   Auto-restart BIND: $SCP_RESTART_BIND"
+    echo ""
+    echo "   O arquivo RPZ será enviado automaticamente quando:"
+    echo "   • Domínios forem adicionados/removidos via interface"
+    echo "   • API /domains/rpz for chamada"
+    echo ""
+    echo "   Para testar: curl http://localhost/api/v1/domains/rpz"
+    echo "   Status SCP: curl http://localhost/api/v1/domains/scp/status"
+else
+    echo ""
+    echo -e "${YELLOW}📡 SCP desabilitado${NC}"
+    echo "   Para habilitar depois, edite o arquivo .env:"
+    echo "   SCP_ENABLED=true"
+    echo "   SCP_HOST=seu-ip"
+    echo "   SCP_USER=seu-usuario"
+fi
 
 echo -e "${GREEN}🎉 Block DNS está pronto para uso!${NC}"
 echo ""

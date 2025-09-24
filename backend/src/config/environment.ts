@@ -26,6 +26,14 @@ export const config: EnvironmentConfig = {
   // DNS Server RPZ
   DNS_RPZ_PATH: process.env.DNS_RPZ_PATH as string,
   REDIRECT: process.env.REDIRECT as string,
+
+  // SCP Configuration
+  SCP_ENABLED: process.env.SCP_ENABLED === 'true',
+  SCP_HOST: process.env.SCP_HOST || '',
+  SCP_USER: process.env.SCP_USER || '',
+  SCP_PATH: process.env.SCP_PATH || '/etc/bind/rpz.db',
+  SCP_KEY: process.env.SCP_KEY || '~/.ssh/id_rsa',
+  SCP_RESTART_BIND: process.env.SCP_RESTART_BIND === 'true',
 };
 
 export default config;
