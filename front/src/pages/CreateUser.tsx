@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import Header from "../components/Header";
 import "./CreateUser.css";
@@ -10,6 +11,8 @@ export default function CreateUser() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [passWordMatch, setPasswordMatch] = useState(true);
+
+    const navigate = useNavigate();
 
     const handleConfirmPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setConfirmPassword(e.target.value);
@@ -34,6 +37,7 @@ export default function CreateUser() {
                 setEmail("");
                 setPassword("");
                 setConfirmPassword("");
+                navigate("/manage-users");
             } else {
                 alert(result.message || "Error registering user");
             }

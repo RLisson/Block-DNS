@@ -82,6 +82,40 @@ authRouter.get('/me', requireAuth, (req: any, res: any) => {
     });
 });
 
+// Rota para obter todos os usuarios
+authRouter.get('/getAll', requireAuth, async (req, res) => {
+    try {
+        const users = await UserModel.getAll();
+        res.status(200).json({ users });
+    } catch (error: any) {
+        res.status(500).json({ error: `Erro no servidor: ${error.message}` });
+    }
+});
+
+authRouter.patch('/update/:id', requireAuth, async (req, res) => {
+    try {
+        const userId = parseInt(req.params.id);
+        const { username, email, password } = req.body;
+        const updatedUser = await UserModel.editUser(userId, username, email, password);
+        if (!updatedUser) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+        res.status(200).json({ message: 'Usuário atualizado com sucesso', user: updatedUser });
+    } catch (error: any) {
+        res.status(500).json({ error: `Erro no servidor: ${error.message}` });
+    }
+});
+
+authRouter.delete('/delete/:id', requireAuth, async (req, res) => {
+    try {
+        const userId = parseInt(req.params.id);
+        await UserModel.deleteUser(userId);
+        res.status(200).json({ message: 'Usuário deletado com sucesso' });
+    } catch (error: any) {
+        res.status(500).json({ error: `Erro no servidor: ${error.message}` });
+    }
+});
+
 // Rota de logout
 authRouter.post('/logout', (req, res) => {
     res.json({ message: 'Logout bem-sucedido' });

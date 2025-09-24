@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute"
 import { AuthProvider } from "./components/AuthProvider"
 import Config from "./pages/Config"
 import CreateUser from "./pages/CreateUser"
+import ManageUsers from "./pages/ManageUsers"
 
 const ProtectedRoutes = [
   {
@@ -23,6 +24,10 @@ const ProtectedRoutes = [
   {
     path: "/create-user",
     element: <CreateUser />
+  },
+  {
+    path: "/gerenciar-usuarios",
+    element: <ManageUsers />
   }
 ]
 

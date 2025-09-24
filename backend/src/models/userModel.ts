@@ -60,6 +60,57 @@ class UserModel {
         }
     };
 
+    static async getAll(): Promise<User[]> {
+        try {
+            const result = await pool.query('SELECT * FROM users');
+            return result.rows;
+        } catch (error: any) {
+            throw new Error(
+                'Erro ao buscar todos os usuários: ' + error.message
+            );
+        }
+    }
+
+    static async editUser(id: number, username?: string, email?: string, password?: string): Promise<User | null> {
+        try {
+            let query = 'UPDATE users SET';
+            const params: (string | number)[] = [];
+            if (username) {
+                query += ` username = $${params.length + 1},`;
+                params.push(username);
+            }
+            if (email) {
+                query += ` email = $${params.length + 1},`;
+                params.push(email);
+            }
+            if (password) {
+                const hashedPassword = await bcrypt.hash(password, 10);
+                query += ` password = $${params.length + 1},`;
+                params.push(hashedPassword);
+            }
+            query = query.slice(0, -1); // Remove a última vírgula
+            query += ` WHERE id = $${params.length + 1} RETURNING *`;
+            params.push(id);
+
+            const result = await pool.query(query, params);
+            return result.rows[0];
+        } catch (error: any) {
+            throw new Error(
+                'Erro ao editar usuário: ' + error.message
+            );
+        }
+    }
+
+    static async deleteUser(id: number): Promise<void> {
+        try {
+            await pool.query('DELETE FROM users WHERE id = $1', [id]);
+        } catch (error: any) {
+            throw new Error(
+                'Erro ao deletar usuário: ' + error.message
+            );
+        }
+    }
+
     static async validatePassword(user: User, password: string): Promise<boolean> {
         return bcrypt.compare(password, user.password);
     }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '../services/domainService';
+import api from '../services/api';
 
 interface PaginationOptions {
   page?: number;
