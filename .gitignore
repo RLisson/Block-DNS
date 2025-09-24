@@ -141,10 +141,14 @@ vite.config.ts.timestamp-*
 .vite/
 backend/db.rpz.zone
 
-# Docker
-.env
+# Docker - Configurações sensíveis
+.env.local
+.env.production
+.env.development
+# .env - Permitir para facilitar setup, mas cuidado com dados sensíveis
 backups/
 *.sql
+!backend/init-db.sql
 
 # Docker volumes (se existirem localmente)
 postgres_data/
