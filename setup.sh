@@ -86,10 +86,10 @@ log "🔍 IP detectado: $LOCAL_IP"
 
 # Menu de configuração
 echo ""
-echo "Escolha o tipo de configuração:"
+echo "Escolha o tipo de ACESSO (você configurará todas as variáveis em seguida):"
 echo "1) 🏠 Acesso LOCAL apenas (localhost)"
 echo "2) 🌐 Acesso REMOTO (rede local: $LOCAL_IP)"
-echo "3) ⚙️  Configuração CUSTOMIZADA"
+echo "3) ⚙️ Acesso CUSTOMIZADO (IP/domínio personalizado)"
 echo ""
 read -p "Digite sua escolha (1, 2 ou 3): " access_choice
 
@@ -97,21 +97,21 @@ case $access_choice in
     1)
         log "Configurando para acesso LOCAL..."
         FRONTEND_API_URL="/api/v1"
-        CORS_ORIGIN="http://localhost"
         ACCESS_TYPE="local"
+        CORS_SUGGESTED="http://localhost"
         ;;
     2)
         log "Configurando para acesso REMOTO..."
         FRONTEND_API_URL="http://$LOCAL_IP/api/v1"
-        CORS_ORIGIN="*"
         ACCESS_TYPE="remote"
+        CORS_SUGGESTED="*"
         ;;
     3)
         echo ""
         read -p "Digite o IP/domínio para acesso (ex: $LOCAL_IP): " custom_ip
         FRONTEND_API_URL="http://$custom_ip/api/v1"
-        CORS_ORIGIN="*"
         ACCESS_TYPE="custom"
+        CORS_SUGGESTED="*"
         ;;
     *)
         error "Opção inválida!"
@@ -121,22 +121,129 @@ esac
 
 header "Configurando Variáveis de Ambiente"
 
-# Atualizar arquivo .env
+# Sempre configurar variáveis (remover verificação de .env existente)
+log "Configurando variáveis de ambiente..."
+echo ""
+echo -e "${BLUE}💬 Você será questionado sobre todas as configurações.${NC}"
+echo -e "${BLUE}   Pressione Enter para usar valores padrão [entre colchetes]${NC}"
+# Configuração do banco de dados
+echo ""
+echo -e "${BLUE}📊 Configuração do Banco de Dados:${NC}"
+read -p "Nome do banco de dados [block_dns]: " db_name
+POSTGRES_DB=${db_name:-block_dns}
+
+read -p "Usuário do banco [blockdns_user]: " db_user  
+POSTGRES_USER=${db_user:-blockdns_user}
+
+while true; do
+    read -s -p "Senha do banco [deixe vazio para gerar automaticamente]: " db_pass
+    echo ""
+    if [[ -z "$db_pass" ]]; then
+        POSTGRES_PASSWORD="blockdns_$(openssl rand -hex 8 2>/dev/null || date +%s)"
+        log "Senha gerada automaticamente: $POSTGRES_PASSWORD"
+        break
+    else
+        read -s -p "Confirme a senha: " db_pass_confirm
+        echo ""
+        if [[ "$db_pass" == "$db_pass_confirm" ]]; then
+            POSTGRES_PASSWORD="$db_pass"
+            break
+        else
+            error "Senhas não coincidem! Tente novamente."
+        fi
+    fi
+done
+
+# Configuração JWT
+echo ""
+echo -e "${BLUE}🔐 Configuração de Segurança:${NC}"
+read -p "JWT Secret [deixe vazio para gerar automaticamente]: " jwt_secret
+if [[ -z "$jwt_secret" ]]; then
+    JWT_SECRET="jwt_$(openssl rand -hex 32 2>/dev/null || echo "secret_$(date +%s)_$(shuf -i 1000-9999 -n 1 2>/dev/null || echo $RANDOM)")"
+    log "JWT Secret gerado automaticamente"
+else
+    JWT_SECRET="$jwt_secret"
+fi
+
+# JWT expiration
+read -p "Tempo de expiração JWT [24h]: " jwt_expiration
+JWT_EXPIRES_IN=${jwt_expiration:-24h}
+
+# Configuração do projeto
+echo ""
+echo -e "${BLUE}⚙️ Configuração do Projeto:${NC}"
+read -p "Nome do projeto Docker [blockdns]: " project_name
+COMPOSE_PROJECT_NAME=${project_name:-blockdns}
+
+# Configuração de portas
+echo ""
+echo -e "${BLUE}🚀 Configuração de Portas:${NC}"
+read -p "Porta do frontend [80]: " frontend_port
+FRONTEND_PORT=${frontend_port:-80}
+
+read -p "Porta interna do backend [3001]: " backend_port  
+BACKEND_PORT=${backend_port:-3001}
+
+# Configuração CORS
+echo ""
+echo -e "${BLUE}🌐 Configuração CORS:${NC}"
+echo "Baseado no seu tipo de acesso ($ACCESS_TYPE), sugerimos: $CORS_SUGGESTED"
+echo ""
+echo "1) Permitir qualquer origem (*) - Recomendado para acesso remoto"
+echo "2) Permitir apenas localhost - Mais seguro para uso local"  
+echo "3) Usar sugestão baseada no tipo de acesso ($CORS_SUGGESTED)"
+echo "4) Configuração personalizada"
+read -p "Escolha [3]: " cors_choice
+
+case ${cors_choice:-3} in
+    1) CORS_ORIGIN="*" ;;
+    2) CORS_ORIGIN="http://localhost:$FRONTEND_PORT" ;;
+    3) CORS_ORIGIN="$CORS_SUGGESTED" ;;
+    4) 
+        read -p "Digite a origem CORS (ex: https://meudominio.com): " custom_cors
+        CORS_ORIGIN="$custom_cors"
+        ;;
+esac
+
+# Mostrar resumo das configurações
+echo ""
+header "Resumo das Configurações"
+echo -e "${GREEN}📋 Suas configurações:${NC}"
+echo "  🏠 Tipo de acesso: $ACCESS_TYPE"
+echo "  🗄️  Banco de dados: $POSTGRES_DB"
+echo "  👤 Usuário do banco: $POSTGRES_USER" 
+echo "  🔐 JWT expira em: $JWT_EXPIRES_IN"
+echo "  🌐 CORS: $CORS_ORIGIN"
+echo "  🚀 Porta frontend: $FRONTEND_PORT"
+echo "  ⚙️  Projeto: $COMPOSE_PROJECT_NAME"
+echo ""
+read -p "Continuar com essas configurações? [Y/n]: " confirm
+if [[ "$confirm" =~ ^[Nn]$ ]]; then
+    warn "Instalação cancelada pelo usuário."
+    exit 0
+fi
+
+# Criar arquivo .env
 cat > .env << EOF
 # Configurações gerais
-COMPOSE_PROJECT_NAME=blockdns
+COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-blockdns}
 
 # Database
-POSTGRES_DB=block_dns
-POSTGRES_USER=blockdns_user
-POSTGRES_PASSWORD=blockdns_password123
+POSTGRES_DB=${POSTGRES_DB:-block_dns}
+POSTGRES_USER=${POSTGRES_USER:-blockdns_user}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-blockdns_password123}
 
 # Backend
-JWT_SECRET=jwt_secret_muito_seguro_docker_$(date +%s)
-CORS_ORIGIN=$CORS_ORIGIN
+JWT_SECRET=${JWT_SECRET:-jwt_secret_muito_seguro_docker_$(date +%s)}
+JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
+CORS_ORIGIN=${CORS_ORIGIN:-*}
 
-# Frontend API URL
+# Frontend
 FRONTEND_API_URL=$FRONTEND_API_URL
+FRONTEND_PORT=${FRONTEND_PORT:-80}
+
+# Portas internas
+BACKEND_PORT=${BACKEND_PORT:-3001}
 EOF
 
 log "✅ Arquivo .env configurado"
