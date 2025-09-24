@@ -75,66 +75,141 @@ CREATE TABLE domains (
 - Cada usuário pode gerenciar múltiplos domínios
 - Domínios são únicos no sistema
 
-## 🚀 Instalação e Configuração
+## 🚀 Instalação Rápida
 
-### Pré-requisitos
-- Node.js >= 18.0.0
-- PostgreSQL >= 12.0
-- npm ou yarn
+### Método 1: Setup Automático (Recomendado)
 
-### 1. Clone o repositório
+Execute o script de instalação que configura tudo automaticamente:
+
 ```bash
-git clone https://github.com/RLisson/Block-DNS.git
-cd Block-DNS
+# Tornar executável (apenas na primeira vez)
+chmod +x setup.sh
+
+# Executar instalação
+./setup.sh
 ```
 
-### 2. Instale as dependências
+O script irá:
+- ✅ Verificar pré-requisitos (Docker, Docker Compose, jq)
+- 🌐 Configurar acesso local ou remoto automaticamente
+- 🐳 Construir e iniciar todos os containers
+- 📊 Inicializar banco de dados com dados de exemplo
+- 🧪 Testar funcionamento da aplicação
+- 📋 Exibir informações de acesso
+
+### Método 2: Docker Compose Manual
+
+1. **Clone o repositório:**
+   ```bash
+   git clone https://github.com/RLisson/Block-DNS.git
+   cd Block-DNS
+   ```
+
+2. **Configure as variáveis de ambiente:**
+   ```bash
+   # O arquivo .env já está configurado, mas você pode editá-lo se necessário
+   ```
+
+3. **Execute com Docker Compose:**
+   ```bash
+   docker-compose up -d --build
+   ```
+
+4. **Inicialize o banco de dados:**
+   ```bash
+   docker exec -i blockdns-postgres psql -U blockdns_user -d block_dns < backend/init-db.sql
+   ```
+
+## 🛠️ Gerenciamento
+
+### Script de Gerenciamento
+
+Use o script interativo para gerenciar a aplicação:
+
 ```bash
-npm run install:all
+./manage.sh
 ```
 
-### 3. Configuração do banco de dados
-Crie um banco PostgreSQL e configure as variáveis de ambiente:
+**Funcionalidades do script:**
+- 📊 Ver status dos containers
+- 🔄 Reiniciar aplicação
+- 🛑 Parar/Iniciar aplicação
+- 📋 Visualizar logs em tempo real
+- 🔧 Reconfigurar acesso (local/remoto)
+- 💾 Fazer backup do banco de dados
+- 🗑️ Reset completo (apagar todos os dados)
+- 📈 Estatísticas de uso
+
+### Comandos Docker Úteis
 
 ```bash
-# backend/.env
-# Servidor
-PORT=3001
-NODE_ENV=development
+# Ver status
+docker-compose ps
 
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=block_dns
-DB_USER=seu_usuario
-DB_PASSWORD=sua_senha
+# Ver logs
+docker-compose logs -f
 
-# API
-API_VERSION=v1
-CORS_ORIGIN=http://localhost:5173
+# Parar aplicação
+docker-compose down
 
-# Autenticação
-JWT_SECRET=seu_jwt_secret_muito_seguro
+# Reiniciar
+docker-compose restart
 
-# DNS/RPZ
-DNS_RPZ_PATH=/var/named/
-REDIRECT=localhost
+# Rebuild completo
+docker-compose down --volumes
+docker-compose up -d --build
 ```
 
-### 4. Configure o frontend
+## 🌐 Acesso à Aplicação
+
+### URLs Padrão
+
+**Após instalação com `./setup.sh`:**
+- **Local:** http://localhost (porta 80)
+- **Remoto:** http://[SEU-IP] (se configurado para acesso remoto)
+
+**Credenciais padrão:**
+- **Usuário:** admin
+- **Senha:** admin123
+
+### Configuração de Acesso
+
+O script `setup.sh` oferece opções de configuração:
+
+1. **🏠 Acesso Local:** Apenas `localhost`
+2. **🌐 Acesso Remoto:** Disponível na rede local pelo IP da máquina
+3. **⚙️ Configuração Customizada:** IP/domínio personalizado
+
+Para **reconfigurar** o tipo de acesso:
 ```bash
-# front/.env
-VITE_BACKEND_URL=http://localhost:3001/api/v1
+./setup-access.sh
 ```
 
-### 5. Inicie o projeto
-```bash
-# Desenvolvimento (backend + frontend)
-npm run dev
+### Endpoints da API
 
-# Ou separadamente:
-npm run dev:backend   # Backend na porta 3001
-npm run dev:frontend  # Frontend na porta 5173
+Base URL: `/api/v1`
+
+**Autenticação:**
+- `POST /auth/login` - Login de usuário
+- `POST /auth/register` - Registro de usuário
+
+**Domínios:**
+- `GET /domains` - Listar domínios (paginado)
+- `POST /domains` - Adicionar domínio
+- `PUT /domains/:id` - Atualizar domínio
+- `DELETE /domains/:id` - Remover domínio
+- `GET /domains/search?q=termo` - Buscar domínios
+- `GET /domains/rpz` - Gerar arquivo RPZ
+
+**Exemplo de uso da API:**
+```bash
+# Login
+TOKEN=$(curl -s -X POST http://localhost/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}' | jq -r '.token')
+
+# Listar domínios
+curl -H "Authorization: Bearer $TOKEN" http://localhost/api/v1/domains
 ```
 
 ## 📁 Estrutura do Projeto

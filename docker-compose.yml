@@ -38,7 +38,7 @@ services:
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - API_VERSION=v1
-      - CORS_ORIGIN=http://localhost:3000
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
       - DNS_RPZ_PATH=/app/rpz/db.rpz.zone
       - REDIRECT=localhost
     # Porta não exposta - apenas comunicação interna
@@ -58,11 +58,11 @@ services:
       context: ./front
       dockerfile: Dockerfile
       args:
-        VITE_BACKEND_URL: http://localhost:3000/api/v1
+        VITE_BACKEND_URL: ${FRONTEND_API_URL:-/api/v1}
     container_name: blockdns-frontend
     restart: unless-stopped
     ports:
-      - "3000:80"
+      - "80:80"
     depends_on:
       - backend
     networks:
