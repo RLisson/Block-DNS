@@ -140,3 +140,13 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 backend/db.rpz.zone
+
+# Docker
+.env
+backups/
+*.sql
+
+# Docker volumes (se existirem localmente)
+postgres_data/
+postgres_dev_data/
+rpz_files/

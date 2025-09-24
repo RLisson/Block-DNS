@@ -1,0 +1,24 @@
+services:
+  # Banco de dados PostgreSQL para desenvolvimento
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: blockdns-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: block_dns_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"  # Porta diferente para não conflitar
+    networks:
+      - blockdns-dev-network
+
+volumes:
+  postgres_dev_data:
+    driver: local
+
+networks:
+  blockdns-dev-network:
+    driver: bridge

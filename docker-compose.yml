@@ -1,0 +1,79 @@
+services:
+  # Banco de dados PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: blockdns-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # Porta não exposta - apenas comunicação interna
+    expose:
+      - "5432"
+    networks:
+      - blockdns-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: blockdns-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - API_VERSION=v1
+      - CORS_ORIGIN=http://localhost:3000
+      - DNS_RPZ_PATH=/app/rpz/db.rpz.zone
+      - REDIRECT=localhost
+    # Porta não exposta - apenas comunicação interna
+    expose:
+      - "3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - rpz_files:/app/rpz
+    networks:
+      - blockdns-network
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+      args:
+        VITE_BACKEND_URL: http://localhost:3000/api/v1
+    container_name: blockdns-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - blockdns-network
+
+volumes:
+  postgres_data:
+    driver: local
+  rpz_files:
+    driver: local
+
+networks:
+  blockdns-network:
+    driver: bridge
