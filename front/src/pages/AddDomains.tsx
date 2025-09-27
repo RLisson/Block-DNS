@@ -10,24 +10,31 @@ import "./AddDomains.css";
 function AddDomains() {
     const [multipleDomains, setMultipleDomains] = useState<boolean>(true);
     const [domains, setDomains] = useState<string[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     async function handleSubmit(event: React.FormEvent) {
         event.preventDefault();
+        if (isSubmitting) return; // Prevent double submit
         if (domains.length === 0) {
             alert("Please add at least one domain.");
             return;
         }
-        const { failed } = await domainService.createDomain(domains);
-        if (failed.length > 0) {
-            alert("Some domains failed to submit");
-            console.log("Failed domains:", failed);
-            setDomains(failed);
-            await domainService.saveRpz(); // Save RPZ even if some domains failed
-            return;
+        setIsSubmitting(true);
+        try {
+            const { failed } = await domainService.createDomain(domains);
+            if (failed.length > 0) {
+                alert("Some domains failed to submit");
+                console.log("Failed domains:", failed);
+                setDomains(failed);
+                await domainService.saveRpz(); // Save RPZ even if some domains failed
+                return;
+            }
+            setDomains([]);
+            await domainService.saveRpz(); // Save RPZ after successful submission
+            alert("Domains submitted successfully!");
+        } finally {
+            setIsSubmitting(false);
         }
-        setDomains([]);
-        await domainService.saveRpz(); // Save RPZ after successful submission
-        alert("Domains submitted successfully!");
     };
 
     const handleClick = (prevValue: boolean) => {
@@ -45,7 +52,9 @@ function AddDomains() {
             ) : (
                 <SingleDomain domains={domains} setDomains={setDomains} />
             )}
-            <button className="custom-button" onClick={handleSubmit}>Submit</button>
+            <button className="custom-button" onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : 'Submit'}
+            </button>
             </main>
         </div>
     );
