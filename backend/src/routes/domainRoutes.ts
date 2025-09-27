@@ -11,6 +11,8 @@ router.get("/search", DomainController.searchDomains);
 
 router.get("/rpz", DomainController.generateRpz);
 
+router.get("/scp-status", DomainController.getScpStatus);
+
 router.get("/:id", DomainController.getDomainById);
 
 router.get("/url/:url", DomainController.getDomainByUrl);

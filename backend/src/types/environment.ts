@@ -12,6 +12,13 @@ export interface EnvironmentConfig {
   JWT_EXPIRES_IN: string;
   DNS_RPZ_PATH: string;
   REDIRECT: string;
+  SCP_ENABLED: boolean;
+  SCP_HOST: string;
+  SCP_USER: string;
+  SCP_PATH: string;
+  SCP_KEY: string;
+  SCP_RESTART_BIND: boolean;
 }
+
 
 export type NodeEnv = 'development' | 'production' | 'test';

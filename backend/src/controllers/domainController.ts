@@ -1,6 +1,7 @@
 import { DomainService } from '../services/domainService';
 import { RpzZone } from '../config/rpz-zone';
 import { requireAuth } from '../middlewares/auth';
+import { ScpService } from '../services/scpService';
 
 export default class DomainController {
     static async getAllDomains(req: any, res: any) {
@@ -224,9 +225,28 @@ export default class DomainController {
         try {
             const domains = await DomainService.getAll();
             await RpzZone.writeZoneFile(domains);
+
+            const scpResult = await ScpService.sendRpzFile();
+            
             res.json({
                 success: true,
-                message: 'Arquivo RPZ gerado com sucesso'
+                message: 'Arquivo RPZ gerado com sucesso',
+                scp: scpResult
+            });
+        } catch (error: any) {
+            res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
+    };
+
+    static async getScpStatus(req: any, res: any) {
+        try {
+            const status = await ScpService.getScpStatus();
+            res.json({
+                success: true,
+                data: status
             });
         } catch (error: any) {
             res.status(500).json({
