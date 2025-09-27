@@ -1,5 +1,5 @@
-import type { Domain } from "../types/domain";
-import { DomainModel } from "../models/domainModel";
+import type { Domain } from "../types/domain.js";
+import { DomainModel } from "../models/domainModel.js";
 
 export class DomainService {
     static validateDomain(url: string): boolean {

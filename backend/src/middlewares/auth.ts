@@ -1,5 +1,5 @@
 import { authenticate } from "passport";
-import passport from "../config/passport";
+import passport from "../config/passport.js";
 
 export const requireAuth = (req: any, res: any, next: any) => {
     passport.authenticate('jwt', { session: false }, (err: any, user: any, info: any) => {

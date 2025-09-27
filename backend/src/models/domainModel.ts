@@ -1,4 +1,4 @@
-import { query } from "../config/database"
+import { query } from "../config/database.js"
 import type { Domain } from "../types/domain.js"
 
 export class DomainModel {

@@ -1,6 +1,6 @@
 import { Router } from "express";
-import DomainController from "../controllers/domainController";
-import { requireAuth } from "../middlewares/auth";
+import DomainController from "../controllers/domainController.js";
+import { requireAuth } from "../middlewares/auth.js";
 const router = Router();
 
 router.use(requireAuth);

@@ -1,7 +1,7 @@
-import { DomainService } from '../services/domainService';
-import { RpzZone } from '../config/rpz-zone';
-import { requireAuth } from '../middlewares/auth';
-import { ScpService } from '../services/scpService';
+import { DomainService } from '../services/domainService.js';
+import { RpzZone } from '../config/rpz-zone.js';
+import { requireAuth } from '../middlewares/auth.js';
+import { ScpService } from '../services/scpService.js';
 
 export default class DomainController {
     static async getAllDomains(req: any, res: any) {

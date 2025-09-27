@@ -1,4 +1,4 @@
-import { config } from './environment';
+import { config } from './environment.js';
 import type { Domain } from '../types/domain.js';
 
 const REDIRECT = config.REDIRECT;

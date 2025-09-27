@@ -1,8 +1,8 @@
 import passport from "passport";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import { Strategy as LocalStrategy } from "passport-local";
-import UserModel from "../models/userModel";
-import { config } from "./environment";
+import UserModel from "../models/userModel.js";
+import { config } from "./environment.js";
 
 
 passport.use(new LocalStrategy(

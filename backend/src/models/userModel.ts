@@ -1,5 +1,5 @@
-import type { User } from "../types/user";
-import pool from "../config/database";
+import type { User } from "../types/user.js";
+import pool from "../config/database.js";
 import bcrypt from "bcryptjs";
 
 class UserModel {
