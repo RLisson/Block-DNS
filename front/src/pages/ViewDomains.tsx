@@ -4,6 +4,7 @@ import type { Domain } from "../types/domain";
 import Header from "../components/Header";
 import ListItem from "../components/ListItem";
 import PaginationControls from "../components/PaginationControls";
+import LoadingSpinner from "../components/LoadingSpinner";
 import domainService from "../services/domainService";
 import "./ViewDomains.css";
 
@@ -26,10 +27,12 @@ function ViewDomains() {
     });
 
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const [operationLoading, setOperationLoading] = useState<{ [key: number]: 'deleting' | 'updating' | null }>({});
 
 
     const handleDelete = async (id: number) => {
         try {
+            setOperationLoading(prev => ({ ...prev, [id]: 'deleting' }));
             const response = await domainService.deleteDomain(id);
             if (response) {
                 await domainService.saveRpz(); // Save RPZ after deleting a domain
@@ -39,11 +42,14 @@ function ViewDomains() {
             }
         } catch (error) {
             alert(`Erro ao deletar domínio: ${error}`);
+        } finally {
+            setOperationLoading(prev => ({ ...prev, [id]: null }));
         }
     };
 
     const handleUpdate = async (id: number, newUrl: string) => {
         try {
+            setOperationLoading(prev => ({ ...prev, [id]: 'updating' }));
             const response = await domainService.updateDomain(id, newUrl);
             if (response) {
                 await domainService.saveRpz(); // Save RPZ after updating a domain
@@ -53,6 +59,8 @@ function ViewDomains() {
             }
         } catch {
             alert(`Erro ao atualizar domínio`);
+        } finally {
+            setOperationLoading(prev => ({ ...prev, [id]: null }));
         }
     };
 
@@ -62,7 +70,7 @@ function ViewDomains() {
                 <Header />
                 <main>
                     <h2>View Domains</h2>
-                    <div className="loading">Carregando domínios...</div>
+                    <LoadingSpinner message="Carregando domínios" size="medium" />
                 </main>
             </div>
         );
@@ -110,6 +118,7 @@ function ViewDomains() {
                                         domain={domain.url} 
                                         deleteFunction={handleDelete} 
                                         editFunction={handleUpdate}
+                                        externalLoading={operationLoading[domain.id]}
                                     />
                                 </div>
                             ))) : (
@@ -123,6 +132,7 @@ function ViewDomains() {
                                             domain={domain.url}
                                             deleteFunction={handleDelete}
                                             editFunction={handleUpdate}
+                                            externalLoading={operationLoading[domain.id]}
                                         />
                                     </div>
                                 ))

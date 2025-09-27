@@ -116,9 +116,26 @@ li:hover {
     font-size: 1rem;
 }
 
+.edit-btn.loading::before {
+    content: "⏳";
+    font-size: 1rem;
+    animation: spin 1s linear infinite;
+}
+
 .delete-btn::before {
     content: "🗑️";
     font-size: 1rem;
+}
+
+.delete-btn.deleting::before {
+    content: "⏳";
+    font-size: 1rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 li.loading-item {
@@ -191,4 +208,63 @@ li.loading-item {
         flex: 1;
         max-width: 80px;
     }
+}
+
+/* Estilos de Loading */
+.loading-item {
+    opacity: 0.7;
+    pointer-events: none;
+    background: #f8f9fa;
+}
+
+.loading-item.deleting {
+    background: #fff5f5;
+    border-color: #fed7d7;
+    animation: fadeOut 0.5s ease-in-out;
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0.3; transform: scale(0.95); }
+}
+
+.loading-text {
+    font-size: 0.8rem;
+    color: #666;
+    font-style: italic;
+    margin-top: 0.25rem;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Botões em estado de loading */
+.edit-btn.loading,
+.delete-btn.deleting {
+    animation: buttonLoading 1s infinite;
+    pointer-events: none;
+}
+
+@keyframes buttonLoading {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+}
+
+/* Spinner para botões */
+.button-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

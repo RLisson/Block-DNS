@@ -1,10 +1,24 @@
 import { useState } from 'react';
 import "./ListItem.css"
 
-function ListItem({ id, domain, deleteFunction, editFunction }: { id: number,domain: string, deleteFunction: (id: number) => void, editFunction: (id: number,newDomain: string) => void }) {
+function ListItem({ 
+    id, 
+    domain, 
+    deleteFunction, 
+    editFunction, 
+    externalLoading 
+}: { 
+    id: number,
+    domain: string, 
+    deleteFunction: (id: number) => void, 
+    editFunction: (id: number,newDomain: string) => void,
+    externalLoading?: 'deleting' | 'updating' | null 
+}) {
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [editedDomain, setEditedDomain] = useState<string>(domain);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const isDeleting = externalLoading === 'deleting';
+    const isUpdating = externalLoading === 'updating' || isLoading;
 
     const handleSave = async () => {
         if (editedDomain.trim() === '') {
@@ -45,7 +59,7 @@ function ListItem({ id, domain, deleteFunction, editFunction }: { id: number,dom
     };
 
     return (
-        <li className={`${isLoading ? 'loading-item' : ''}`}>
+        <li className={`${isUpdating || isDeleting ? 'loading-item' : ''} ${isDeleting ? 'deleting' : ''}`}>
             <div className='domain-info'>
                 {isEditing ? (
                     <input 
@@ -57,28 +71,30 @@ function ListItem({ id, domain, deleteFunction, editFunction }: { id: number,dom
                         autoFocus
                         className="domain-edit-input"
                         placeholder="Digite o domínio..."
-                        disabled={isLoading}
+                        disabled={isUpdating || isDeleting}
                     />
                 ) : (
                     <>
                         <span className='domain-url'>{editedDomain}</span>
                         <span className='domain-id'>ID: {id}</span>
+                        {isDeleting && <span className='loading-text'>Deletando...</span>}
+                        {isUpdating && !isDeleting && <span className='loading-text'>Atualizando...</span>}
                     </>
                 )}
             </div>
             <div className='action-btn'>
                 <button 
                     onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-                    className={`edit-btn ${isEditing ? 'saving' : ''}`}
-                    title={isEditing ? "Salvar" : "Editar"}
-                    disabled={isLoading}
+                    className={`edit-btn ${isEditing ? 'saving' : ''} ${isUpdating ? 'loading' : ''}`}
+                    title={isEditing ? (isUpdating ? "Salvando..." : "Salvar") : "Editar"}
+                    disabled={isUpdating || isDeleting}
                 >
                 </button>
                 <button 
                     onClick={handleDelete}
-                    className="delete-btn"
-                    title="Deletar"
-                    disabled={isLoading}
+                    className={`delete-btn ${isDeleting ? 'deleting' : ''}`}
+                    title={isDeleting ? "Deletando..." : "Deletar"}
+                    disabled={isUpdating || isDeleting}
                 >
                 </button>
             </div>
