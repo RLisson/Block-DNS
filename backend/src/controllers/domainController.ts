@@ -223,20 +223,31 @@ export default class DomainController {
 
     static async generateRpz(req: any, res: any) {
         try {
+            const meta: any = { steps: [] };
+            meta.steps.push({ step: 'fetch-domains:start' });
             const domains = await DomainService.getAll();
-            await RpzZone.writeZoneFile(domains);
+            meta.steps.push({ step: 'fetch-domains:done', count: domains.length });
 
+            meta.steps.push({ step: 'write-file:start' });
+            await RpzZone.writeZoneFile(domains);
+            meta.steps.push({ step: 'write-file:done' });
+
+            meta.steps.push({ step: 'scp:start' });
             const scpResult = await ScpService.sendRpzFile();
-            
+            meta.steps.push({ step: 'scp:done', scp: scpResult });
+
             res.json({
                 success: true,
                 message: 'Arquivo RPZ gerado com sucesso',
-                scp: scpResult
+                scp: scpResult,
+                meta
             });
         } catch (error: any) {
+            console.error('[RPZ] Erro na geração:', error);
             res.status(500).json({
                 success: false,
-                error: error.message
+                error: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
             });
         }
     };
