@@ -80,7 +80,7 @@ export class ScpService {
         try {
             console.log('🔄 Tentando reiniciar serviço BIND na VM de destino...');
             
-            const sshCommand = `ssh -i "${config.SCP_KEY}" -o ConnectTimeout=10 -o StrictHostKeyChecking=no "${config.SCP_USER}@${config.SCP_HOST}" "sudo service bind9 restart"`;
+            const sshCommand = `ssh -i "${config.SCP_KEY}" -o PubkeyAcceptedAlgorithms=+ssh-rsa -o ConnectTimeout=10 -o StrictHostKeyChecking=no "${config.SCP_USER}@${config.SCP_HOST}" "sudo service bind9 restart"`;
             
             const { stdout, stderr } = await execAsync(sshCommand);
             
@@ -136,7 +136,7 @@ export class ScpService {
             const startTime = Date.now();
             
             // Comando SSH simples para testar conectividade
-            const sshCommand = `ssh -i "${config.SCP_KEY}" -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o BatchMode=yes "${config.SCP_USER}@${config.SCP_HOST}" "echo 'SSH_TEST_OK'"`;
+            const sshCommand = `ssh -i "${config.SCP_KEY}" -o PubkeyAcceptedAlgorithms=+ssh-rsa -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o BatchMode=yes "${config.SCP_USER}@${config.SCP_HOST}" "echo 'SSH_TEST_OK'"`;
             
             const { stdout, stderr } = await execAsync(sshCommand);
             const responseTime = Date.now() - startTime;
