@@ -1,5 +1,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import path from 'path';
+import os from 'os';
 import { config } from '../config/environment.js';
 
 const execAsync = promisify(exec);
@@ -35,10 +37,24 @@ export class ScpService {
                 };
             }
 
-            console.log(`📡 Enviando arquivo RPZ para ${config.SCP_USER}@${config.SCP_HOST}:${config.SCP_PATH}`);
+            // Resolver caminho da chave (expandir ~) e validar existência
+            const expandedKeyPath = expandHome(config.SCP_KEY);
+            try {
+                await fs.access(expandedKeyPath);
+            } catch {
+                return {
+                    success: false,
+                    message: `Chave SSH não encontrada em ${expandedKeyPath}. Verifique SCP_KEY.`
+                };
+            }
 
-            // Comando SCP
-            const scpCommand = `scp -i "${config.SCP_KEY}" -o PubkeyAcceptedAlgorithms=+ssh-rsa -o ConnectTimeout=10 -o StrictHostKeyChecking=no "${config.DNS_RPZ_PATH}" "${config.SCP_USER}@${config.SCP_HOST}:${config.SCP_PATH}"`;
+            const baseOptions = '-o PubkeyAcceptedAlgorithms=+ssh-rsa -o ConnectTimeout=10 -o StrictHostKeyChecking=no';
+
+            console.log(`📡 Enviando arquivo RPZ para ${config.SCP_USER}@${config.SCP_HOST}:${config.SCP_PATH}`);
+            console.log(`🔑 Usando chave: ${expandedKeyPath}`);
+
+            // Comando SCP (usar caminho expandido)
+            const scpCommand = `scp -i "${expandedKeyPath}" ${baseOptions} "${config.DNS_RPZ_PATH}" "${config.SCP_USER}@${config.SCP_HOST}:${config.SCP_PATH}"`;
             
             try {
                 const { stdout, stderr } = await execAsync(scpCommand);
@@ -60,10 +76,19 @@ export class ScpService {
                 };
 
             } catch (scpError: any) {
-                console.error('Erro no SCP:', scpError);
+                const rawMessage = scpError?.message || '';
+                let userMessage = 'Erro ao enviar arquivo via SCP';
+                if (rawMessage.includes('Permission denied (publickey')) {
+                    userMessage = 'Falha de autenticação (publickey). Verifique se a chave privada corresponde à chave pública autorizada no servidor.';
+                } else if (rawMessage.includes('No such file')) {
+                    userMessage = 'Arquivo de origem ou destino inválido.';
+                } else if (rawMessage.includes('Connection timed out')) {
+                    userMessage = 'Timeout de conexão com o host remoto.';
+                }
+                console.error('Erro no SCP:', rawMessage);
                 return {
                     success: false,
-                    message: `Erro ao enviar arquivo via SCP: ${scpError.message}`
+                    message: `${userMessage}: ${rawMessage}`
                 };
             }
 
@@ -80,7 +105,9 @@ export class ScpService {
         try {
             console.log('🔄 Tentando reiniciar serviço BIND na VM de destino...');
             
-            const sshCommand = `ssh -i "${config.SCP_KEY}" -o PubkeyAcceptedAlgorithms=+ssh-rsa -o ConnectTimeout=10 -o StrictHostKeyChecking=no "${config.SCP_USER}@${config.SCP_HOST}" "sudo service bind9 restart"`;
+            const expandedKeyPath = expandHome(config.SCP_KEY);
+            const baseOptions = '-o PubkeyAcceptedAlgorithms=+ssh-rsa -o ConnectTimeout=10 -o StrictHostKeyChecking=no';
+            const sshCommand = `ssh -i "${expandedKeyPath}" ${baseOptions} "${config.SCP_USER}@${config.SCP_HOST}" "sudo service bind9 restart"`;
             
             const { stdout, stderr } = await execAsync(sshCommand);
             
@@ -136,7 +163,9 @@ export class ScpService {
             const startTime = Date.now();
             
             // Comando SSH simples para testar conectividade
-            const sshCommand = `ssh -i "${config.SCP_KEY}" -o PubkeyAcceptedAlgorithms=+ssh-rsa -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o BatchMode=yes "${config.SCP_USER}@${config.SCP_HOST}" "echo 'SSH_TEST_OK'"`;
+            const expandedKeyPath = expandHome(config.SCP_KEY);
+            const baseOptions = '-o PubkeyAcceptedAlgorithms=+ssh-rsa -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o BatchMode=yes';
+            const sshCommand = `ssh -i "${expandedKeyPath}" ${baseOptions} "${config.SCP_USER}@${config.SCP_HOST}" "echo 'SSH_TEST_OK'"`;
             
             const { stdout, stderr } = await execAsync(sshCommand);
             const responseTime = Date.now() - startTime;
@@ -184,4 +213,13 @@ export class ScpService {
             };
         }
     }
+}
+
+// Utilitário para expandir ~ no caminho de arquivo
+function expandHome(filePath: string): string {
+    if (!filePath) return filePath;
+    if (filePath.startsWith('~')) {
+        return path.join(os.homedir(), filePath.slice(1));
+    }
+    return filePath;
 }
