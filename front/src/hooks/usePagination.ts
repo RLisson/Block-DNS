@@ -67,10 +67,9 @@ export const usePagination = <T>(
       if (options.sortBy) queryParams.append('sortBy', options.sortBy);
       if (options.sortOrder) queryParams.append('sortOrder', options.sortOrder);
 
-      const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api/v1';
-      const url = `${baseUrl}${endpoint}?${queryParams.toString()}`;
-
-      const response = await api.get(url);
+  // O api já possui baseURL configurada (inclui /api/v1). Passamos apenas o endpoint relativo.
+  const url = `${endpoint}?${queryParams.toString()}`;
+  const response = await api.get(url);
       
       if (response.data.success) {
         setData(response.data.data);
