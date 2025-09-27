@@ -1,6 +1,17 @@
 import axios, { AxiosHeaders, type InternalAxiosRequestConfig } from 'axios';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+let BACKEND_URL = import.meta.env.VITE_BACKEND_URL as string | undefined;
+
+// Se for relativo (ex: /api/v1) ou não definido, construir a partir do origin
+if (!BACKEND_URL) {
+  BACKEND_URL = '/api/v1';
+}
+if (BACKEND_URL.startsWith('/')) {
+  BACKEND_URL = window.location.origin.replace(/\/$/, '') + BACKEND_URL;
+}
+
+// Log (pode remover depois)
+console.log('[API] baseURL =', BACKEND_URL);
 
 const api = axios.create({
   baseURL: BACKEND_URL,

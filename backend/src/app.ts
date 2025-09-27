@@ -13,6 +13,16 @@ app.use(cors({
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 
+// Logger simples
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const ms = Date.now() - start;
+    console.log(`[REQ] ${req.method} ${req.originalUrl} -> ${res.statusCode} (${ms}ms)`);
+  });
+  next();
+});
+
 // Rotas
 app.use(`/api/${config.API_VERSION}/domains`, router);
 app.use(`/api/${config.API_VERSION}/auth`, authRouter);
