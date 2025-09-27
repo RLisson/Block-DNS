@@ -139,5 +139,4 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
-backend/db.rpz.zone
-front/src/pages/ViewDomains.css
+.DS_Store
