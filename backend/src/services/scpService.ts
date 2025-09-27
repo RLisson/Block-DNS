@@ -38,7 +38,7 @@ export class ScpService {
             console.log(`📡 Enviando arquivo RPZ para ${config.SCP_USER}@${config.SCP_HOST}:${config.SCP_PATH}`);
 
             // Comando SCP
-            const scpCommand = `scp -i "${config.SCP_KEY}" -o ConnectTimeout=10 -o StrictHostKeyChecking=no "${config.DNS_RPZ_PATH}" "${config.SCP_USER}@${config.SCP_HOST}:${config.SCP_PATH}"`;
+            const scpCommand = `scp -i "${config.SCP_KEY}" -o PubkeyAcceptedAlgorithms=+ssh-rsa -o ConnectTimeout=10 -o StrictHostKeyChecking=no "${config.DNS_RPZ_PATH}" "${config.SCP_USER}@${config.SCP_HOST}:${config.SCP_PATH}"`;
             
             try {
                 const { stdout, stderr } = await execAsync(scpCommand);
