@@ -7,6 +7,8 @@
     "dev:watch": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "db:init": "npm run build && node dist/scripts/initDatabase.js",
+    "db:init:sql": "psql -h $DB_HOST -U $DB_USER -d $DB_NAME -f init-db.sql",
     "test": "jest"
   },
   "dependencies": {
