@@ -6,6 +6,7 @@ interface PaginationOptions {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
+  searchTerm?: string;
 }
 
 interface PaginatedResponse<T> {
@@ -25,6 +26,7 @@ interface UsePaginationResult<T> {
   data: T[];
   loading: boolean;
   error: string | null;
+  searchTerm?: string;
   pagination: {
     page: number;
     limit: number;
@@ -38,6 +40,7 @@ interface UsePaginationResult<T> {
   prevPage: () => void;
   changeLimit: (limit: number) => void;
   refresh: () => void;
+  setSearchTerm: (term: string) => void;
 }
 
 export const usePagination = <T>(
@@ -66,11 +69,11 @@ export const usePagination = <T>(
       if (options.limit) queryParams.append('limit', options.limit.toString());
       if (options.sortBy) queryParams.append('sortBy', options.sortBy);
       if (options.sortOrder) queryParams.append('sortOrder', options.sortOrder);
+      if (options.searchTerm) queryParams.append('searchTerm', options.searchTerm);
 
-  // O api já possui baseURL configurada (inclui /api/v1). Passamos apenas o endpoint relativo.
-  const url = `${endpoint}?${queryParams.toString()}`;
-  const response = await api.get(url);
-      
+      const url = `${endpoint}?${queryParams.toString()}`;
+      const response = await api.get(url);
+
       if (response.data.success) {
         setData(response.data.data);
         setPagination(response.data.pagination);
@@ -114,6 +117,10 @@ export const usePagination = <T>(
     fetchData();
   }, [fetchData]);
 
+  const setSearchTerm = useCallback((term: string) => {
+    setOptions(prev => ({ ...prev, searchTerm: term, page: 1 })); // Reset para página 1 ao buscar
+  }, []);
+
   return {
     data,
     loading,
@@ -123,6 +130,7 @@ export const usePagination = <T>(
     nextPage,
     prevPage,
     changeLimit,
-    refresh
+    refresh,
+    setSearchTerm
   };
 };
