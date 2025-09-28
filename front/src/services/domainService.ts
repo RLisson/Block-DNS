@@ -59,9 +59,7 @@ export default class domainService {
   }
 
   static async search(term: string): Promise<Domain[]> {
-    const response = await api.get(`/domains/search`, {
-      params: { q: term }
-    });
+    const response = await api.get(`/domains/search?term=` + term);
     return response.data.data;
   }
 

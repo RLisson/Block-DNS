@@ -7,7 +7,7 @@ export default class DomainController {
     static async getAllDomains(req: any, res: any) {
         try {
             // Verificar se é uma requisição paginada
-            const { page, limit, sortBy, sortOrder } = req.query;
+            const { page, limit, sortBy, sortOrder, searchTerm } = req.query;
             
             if (page || limit) {
                 // Usar paginação
@@ -21,6 +21,7 @@ export default class DomainController {
                     limitNum,
                     sortColumn,
                     order as 'ASC' | 'DESC',
+                    searchTerm ? searchTerm.toString() : undefined
                 );
                 
                 res.json({

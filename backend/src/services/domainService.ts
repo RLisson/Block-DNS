@@ -118,7 +118,8 @@ export class DomainService {
         page: number = 1,
         limit: number = 10,
         sortBy: string = 'id',
-        sortOrder: 'ASC' | 'DESC' = 'ASC'
+        sortOrder: 'ASC' | 'DESC' = 'ASC',
+        search?: string
     ): Promise<{
         data: any[];
         pagination: {
@@ -136,12 +137,15 @@ export class DomainService {
             const validatedLimit = Math.min(Math.max(1, Math.floor(limit)), 100); // Máximo de 100 itens por página
             const validSortOrders: ('ASC' | 'DESC')[] = ['ASC', 'DESC'];
             const validatedSortOrder = validSortOrders.includes(sortOrder) ? sortOrder : 'ASC';
+            const searchTerm = search ? search.trim() : undefined;
+
 
             return await DomainModel.getAllPaginated(
                 validatedPage,
                 validatedLimit,
                 sortBy,
-                validatedSortOrder
+                validatedSortOrder,
+                searchTerm
             );
         } catch (error) {
             console.error('Erro ao buscar domínios paginados:', error);

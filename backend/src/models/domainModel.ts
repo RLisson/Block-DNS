@@ -1,3 +1,4 @@
+import { Query, QueryResult } from "pg";
 import { query } from "../config/database.js"
 import type { Domain } from "../types/domain.js"
 
@@ -76,10 +77,11 @@ export class DomainModel {
     }
 
     static async getAllPaginated(
-        page: number = 1, 
-        limit: number = 10, 
-        sortBy: string = 'id', 
-        sortOrder: 'ASC' | 'DESC' = 'ASC'
+        page: number = 1,
+        limit: number = 10,
+        sortBy: string = 'id',
+        sortOrder: 'ASC' | 'DESC' = 'ASC',
+        search?: string
     ): Promise<{
         data: any[];
         pagination: {
@@ -95,25 +97,39 @@ export class DomainModel {
         const validSortColumns = ['id', 'url', 'created_at'];
         const sortColumn = validSortColumns.includes(sortBy) ? sortBy : 'id';
         const order = sortOrder === 'DESC' ? 'DESC' : 'ASC';
-        
+        const searchTerm = search ? search.trim() : undefined;
+
         // Calcular offset
         const offset = (page - 1) * limit;
-        
+
         // Buscar total de registros
-        const countResult = await query('SELECT COUNT(*) as total FROM domains');
-        const total = parseInt(countResult.rows[0].total);
-        
+        let countResult;
+        let dataResult;
+
         // Buscar dados paginados
-        const dataResult = await query(
-            `SELECT * FROM domains ORDER BY ${sortColumn} ${order} LIMIT $1 OFFSET $2`,
-            [limit, offset]
-        );
-        
+        if (searchTerm) {
+            countResult = await query(
+                'SELECT COUNT(*) as total FROM domains WHERE url ILIKE $1',
+                [`%${searchTerm}%`]
+            );
+            dataResult = await query(
+                `SELECT * FROM domains WHERE url ILIKE $3 ORDER BY ${sortColumn} ${order} LIMIT $1 OFFSET $2`,
+                [limit, offset, `%${searchTerm}%`]
+            );
+        } else {
+            countResult = await query('SELECT COUNT(*) as total FROM domains');
+            dataResult = await query(
+                `SELECT * FROM domains ORDER BY ${sortColumn} ${order} LIMIT $1 OFFSET $2`,
+                [limit, offset]
+            );
+        }
+        const total = parseInt(countResult.rows[0].total);
+
         // Calcular metadados de paginação
         const totalPages = Math.ceil(total / limit);
         const hasNext = page < totalPages;
         const hasPrev = page > 1;
-        
+
         return {
             data: dataResult.rows,
             pagination: {
